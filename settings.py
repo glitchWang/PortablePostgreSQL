@@ -2,7 +2,7 @@
 from __future__ import print_function
 import os.path
 
-ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
 class _D(object):
     def __init__(self, **kwargs):
