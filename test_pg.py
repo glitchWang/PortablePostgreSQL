@@ -2,6 +2,12 @@
 from pg import Database, find_in_dir
 import shutil, os
 
+def _rmtree(folder_name):
+    try:
+        shutil.rmtree(folder_name)
+    except:
+        pass
+
 def test_find_file():
     files = list(find_in_dir('.', 'psql.exe'))
     assert 2 == len(files)
@@ -26,12 +32,6 @@ def test_empty_data_folder():
     higher_ver_engine = filter(lambda e:e.version.startswith('9.4'), engines)
     assert len(lower_ver_engine) > 0 and not lower_ver_engine[0].cluster_dir_exists
     assert len(higher_ver_engine) > 0 and not higher_ver_engine[0].cluster_dir_exists
-
-def _rmtree(folder_name):
-    try:
-        shutil.rmtree(folder_name)
-    except:
-        pass
 
 def test_none_empty_data_folder():
     folder_name = './Data/9.3'
@@ -77,4 +77,43 @@ def test_rebuild_cluster_failed():
         else:
             assert False, 'Negative case, should not be here'
     finally:
+        _rmtree(folder_name)
+
+def test_engine_not_running_with_cluster():
+    folder_name = './Data/9.4'
+    try:
+        db = Database('./App/9.4')
+        db.init_cluster()
+        assert db.cluster_dir_exists
+        assert not db.running
+    finally:
+        _rmtree(folder_name)
+
+def test_engine_not_running_with_cluster():
+    db = Database('./App/9.4')
+    assert not db.cluster_dir_exists
+    assert not db.running
+
+def test_stop_nothing():
+    db = Database('./App/9.4')
+    db.stop()
+    assert True
+
+def test_stop_with_cluster_initialized():
+    db = Database('./App/9.4')
+    db.init_cluster()
+    assert db.cluster_dir_exists
+    db.stop()
+    assert True
+
+def test_start_server():
+    folder_name = './Data/9.4'
+    try:
+        db = Database('./App/9.4')
+        db.init_cluster()
+        db.start()
+        assert db.running
+        assert db.pid > 0
+    finally:
+        db.stop()
         _rmtree(folder_name)
