@@ -38,7 +38,7 @@ class Database(object):
     def _run_and_exit(self, cmd, *args):
         c = '{} {}'.format(os.path.join(self.engine_dir, 'bin', cmd), ' '.join(args))
         cmd_line = '{} {}'.format(c, ' '.join(args))
-        return subprocess.call(cmd_line).pid
+        return subprocess.call(cmd_line)
 
     @property
     def version(self):

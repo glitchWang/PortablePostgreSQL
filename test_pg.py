@@ -101,8 +101,7 @@ def test_stop_nothing():
 
 def test_stop_with_cluster_initialized():
     db = Database('./App/9.4')
-    db.init_cluster()
-    assert db.cluster_dir_exists
+    assert not db.cluster_dir_exists
     db.stop()
     assert True
 
