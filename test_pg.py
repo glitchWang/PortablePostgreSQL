@@ -1,6 +1,6 @@
 #-*-coding: utf-8-*-
 from pg import Database, find_in_dir
-import shutil, os
+import shutil, os, time
 
 def _rmtree(folder_name):
     try:
@@ -85,14 +85,14 @@ def test_engine_not_running_with_cluster():
         db = Database('./App/9.4')
         db.init_cluster()
         assert db.cluster_dir_exists
-        assert not db.running
+        assert not db.instance.running
     finally:
         _rmtree(folder_name)
 
 def test_engine_not_running_with_cluster():
     db = Database('./App/9.4')
     assert not db.cluster_dir_exists
-    assert not db.running
+    assert not db.instance.running
 
 def test_stop_nothing():
     db = Database('./App/9.4')
@@ -111,8 +111,32 @@ def test_start_server():
         db = Database('./App/9.4')
         db.init_cluster()
         db.start()
-        assert db.running
-        assert db.pid > 0
+        assert db.instance.running
+        assert db.instance.pid > 0
+    finally:
+        db.stop()
+        _rmtree(folder_name)
+
+def test_db_instance():
+    folder_name = './Data/9.4'
+    try:
+        db = Database('./App/9.4')
+        db.init_cluster()
+        assert db.instance is not None
+        assert not db.instance.running
+    finally:
+        db.stop()
+        _rmtree(folder_name)
+
+def test_db_instance_properties():
+    folder_name = './Data/9.4'
+    db = Database('./App/9.4')
+    try:
+        db.init_cluster()
+        db.start()
+        assert db.instance.running
+        assert db.instance.pid > 0
+        assert os.path.abspath(db.instance.data_dir) == os.path.abspath(db.cluster_dir_name)
     finally:
         db.stop()
         _rmtree(folder_name)

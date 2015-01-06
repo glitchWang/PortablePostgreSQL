@@ -36,6 +36,7 @@ class _D(object):
 settings = {
     'engines_dir': os.path.join(ROOT_DIR, 'App'),
     'data_dir': os.path.join(ROOT_DIR, 'Data'),
+    'liveness_test_threshold': 10
 }
 config = _D(**settings)
 __all__ = ['config']
