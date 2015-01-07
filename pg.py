@@ -23,6 +23,7 @@ def kill_proc_tree(pid, including_parent=True):
         parent.kill()
 
 def read_line(fname, lineno):
+    linecache.clearcache()
     return linecache.getline(fname, lineno).strip('\r\n')
 
 def from_time_stamp(ts):
@@ -120,19 +121,22 @@ class Database(object):
                 raise IOError('cluster directory exists at {} and rebuild == {}'.format(self.cluster_dir_name, rebuild))
         self._run('initdb -D {} -A trust'.format(self.cluster_dir_name))
 
-    def stop(self, force=False):
+    def stop(self):
         if self.instance.running:
             pid = self.instance.pid
-            cmd = 'pg_ctl stop -D {}'.format(self.cluster_dir_name)
-            self._run_and_exit(cmd)
-            if not self._ensure_engine_status(False):
-                raise IOError('Cannot kill the postgresql server using pid:{}'.format(pid))
+            if pid:
+                cmd = 'pg_ctl stop -D {}'.format(self.cluster_dir_name)
+                self._run_and_exit(cmd)
+                if not self._ensure_engine_status(False):
+                    self.kill_proc_tree(pid)
+                    if not self._ensure_engine_status(False):
+                        raise IOError('Cannot kill the postgresql server using pid:{}'.format(pid))
 
     def start(self, restart=False):
         if self.cluster_dir_exists:
             if self.instance.running:
                 if restart:
-                    self.stop(force=True)
+                    self.stop()
             cmd = 'pg_ctl start -D {} -l {}'.format(self.cluster_dir_name, self.log_file_name)
             self._run_and_exit(cmd)
             if not self._ensure_engine_status(True):

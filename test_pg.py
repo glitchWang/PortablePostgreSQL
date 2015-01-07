@@ -130,8 +130,8 @@ def test_db_instance():
 
 def test_db_instance_properties():
     folder_name = './Data/9.4'
-    db = Database('./App/9.4')
     try:
+        db = Database('./App/9.4')
         db.init_cluster()
         db.start()
         assert db.instance.running
