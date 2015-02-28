@@ -4,7 +4,9 @@ import os.path
 
 ROOT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
+
 class _D(object):
+
     def __init__(self, **kwargs):
         for k, v in kwargs.items():
             tv = type(v)

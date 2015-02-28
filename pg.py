@@ -10,26 +10,32 @@ import linecache
 from settings import config
 import psutil
 
+
 def find_in_dir(path, name):
     for root, dirs, files in os.walk(path):
         if name in files:
             yield os.path.abspath(os.path.join(root, name))
 
-def kill_proc_tree(pid, including_parent=True):    
+
+def kill_proc_tree(pid, including_parent=True):
     parent = psutil.Process(pid)
     for child in parent.children(recursive=True):
         child.kill()
     if including_parent:
         parent.kill()
 
+
 def read_line(fname, lineno):
     linecache.clearcache()
     return linecache.getline(fname, lineno).strip('\r\n')
 
+
 def from_time_stamp(ts):
     return datetime.datetime.fromtimestamp(long(ts))
 
+
 class ClusterInstance(object):
+
     def __init__(self, fname):
         self.fname = fname
         self.properties = {
@@ -57,24 +63,29 @@ class ClusterInstance(object):
     def __repr__(self):
         return '<ClusterInstance from {}>'.format(self.fname)
 
+
 class Database(object):
+
     @classmethod
     def db_engines(cls):
         psqls = find_in_dir(config.engines_dir, 'psql.exe')
         for psql in psqls:
-            engine_dir = os.path.abspath(os.path.join(os.path.dirname(psql), '..'))
+            engine_dir = os.path.abspath(
+                os.path.join(os.path.dirname(psql), '..'))
             yield Database(engine_dir)
 
     def __init__(self, engine_dir):
         self.engine_dir = engine_dir
 
     def _run(self, cmd, *args):
-        c = '{} {}'.format(os.path.join(self.engine_dir, 'bin', cmd), ' '.join(args))
+        c = '{} {}'.format(
+            os.path.join(self.engine_dir, 'bin', cmd), ' '.join(args))
         cmd_line = '{} {}'.format(c, ' '.join(args))
         return subprocess.check_output(cmd_line)
 
     def _run_and_exit(self, cmd, *args):
-        c = '{} {}'.format(os.path.join(self.engine_dir, 'bin', cmd), ' '.join(args))
+        c = '{} {}'.format(
+            os.path.join(self.engine_dir, 'bin', cmd), ' '.join(args))
         cmd_line = '{} {}'.format(c, ' '.join(args))
         return subprocess.call(cmd_line)
 
@@ -118,7 +129,8 @@ class Database(object):
             if rebuild:
                 shutil.rmtree(self.cluster_dir_name)
             else:
-                raise IOError('cluster directory exists at {} and rebuild == {}'.format(self.cluster_dir_name, rebuild))
+                raise IOError('cluster directory exists at {} and rebuild == {}'.format(
+                    self.cluster_dir_name, rebuild))
         self._run('initdb -D {} -A trust'.format(self.cluster_dir_name))
 
     def stop(self):
@@ -130,19 +142,23 @@ class Database(object):
                 if not self._ensure_engine_status(False):
                     self.kill_proc_tree(pid)
                     if not self._ensure_engine_status(False):
-                        raise IOError('Cannot kill the postgresql server using pid:{}'.format(pid))
+                        raise IOError(
+                            'Cannot kill the postgresql server using pid:{}'.format(pid))
 
     def start(self, restart=False):
         if self.cluster_dir_exists:
             if self.instance.running:
                 if restart:
                     self.stop()
-            cmd = 'pg_ctl start -D {} -l {}'.format(self.cluster_dir_name, self.log_file_name)
+            cmd = 'pg_ctl start -D {} -l {}'.format(
+                self.cluster_dir_name, self.log_file_name)
             self._run_and_exit(cmd)
             if not self._ensure_engine_status(True):
-                raise IOError('postmaster.pid still not exist under {}, start might fail'.format(self.cluster_dir_name))
+                raise IOError('postmaster.pid still not exist under {}, start might fail'.format(
+                    self.cluster_dir_name))
         else:
-            raise IOError('cluster dir does not exist:{}, create it before serving'.format(self.cluster_dir_name))
+            raise IOError('cluster dir does not exist:{}, create it before serving'.format(
+                self.cluster_dir_name))
 
     def psql(self):
         self._run_and_exit('psql.exe')
