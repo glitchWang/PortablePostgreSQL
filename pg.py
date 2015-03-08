@@ -164,4 +164,4 @@ class Database(object):
         self._run_and_exit('psql.exe')
 
     def __repr__(self):
-        return '<PostgreSQL version:{}, dir:{}, cluster: {}, {}>'.format(self.version, self.engine_dir, self.cluster_dir_exists and self.cluster_dir_name or 'not initialized', self.instance.running and 'running' or 'stopped')
+        return '<PostgreSQL version:{}, dir:{}, cluster:{}, status:{}>'.format(self.version, self.engine_dir, self.cluster_dir_exists and self.cluster_dir_name or 'not initialized', self.instance.running and 'running' or 'stopped')
