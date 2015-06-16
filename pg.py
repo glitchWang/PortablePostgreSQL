@@ -131,7 +131,7 @@ class Database(object):
             else:
                 raise IOError('cluster directory exists at {} and rebuild == {}'.format(
                     self.cluster_dir_name, rebuild))
-        self._run('initdb -D {} -A trust'.format(self.cluster_dir_name))
+        self._run('initdb --encoding=UTF-8 -D {} -A trust'.format(self.cluster_dir_name))
 
     def stop(self):
         if self.instance.running:
@@ -140,7 +140,7 @@ class Database(object):
                 cmd = 'pg_ctl stop -D {}'.format(self.cluster_dir_name)
                 self._run_and_exit(cmd)
                 if not self._ensure_engine_status(False):
-                    self.kill_proc_tree(pid)
+                    kill_proc_tree(pid)
                     if not self._ensure_engine_status(False):
                         raise IOError(
                             'Cannot kill the postgresql server using pid:{}'.format(pid))
